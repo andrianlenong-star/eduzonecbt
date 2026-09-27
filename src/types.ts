@@ -1,0 +1,57 @@
+export type QuestionType = 'PG' | 'PGK' | 'BS' | 'ISIAN' | 'URAIAN';
+export type Difficulty = 'REGULER' | 'HOTS';
+
+export interface Question {
+  id: string;
+  tipe: QuestionType;
+  content: string;
+  image: string | null;
+  options: string[];
+  answer: string | string[]; // Single string for PG/BS/ISIAN/URAIAN, array of strings for PGK
+  difficulty: Difficulty;
+}
+
+export interface ExamSettings {
+  judul: string;
+  mapel: string;
+  sekolah: string;
+  logoUrl: string;
+  tahunAjaran: string;
+  durasiMenit: number;
+  token: string;
+  adminPass: string;
+  acakSoal: boolean;
+  tampilkanNilai: boolean;
+}
+
+export interface ExamResult {
+  id: string;
+  nama: string;
+  kelas: string;
+  nilai: number;
+  benar: number;
+  totalSoal: number;
+  selesaiPada: string;
+  pelanggaran: number;
+  mapelId?: string;
+  mapelNama?: string;
+  nisn?: string;
+}
+
+export interface SubjectPackage {
+  id: string;
+  kode: string;
+  nama: string;
+  guruPengampu?: string;
+  kelas?: string;
+  passwordBankSoal?: string;
+  color?: string;
+  deskripsi?: string;
+  settings: ExamSettings;
+  questions: Question[];
+  results: ExamResult[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type ActiveView = 'portal' | 'login' | 'exam' | 'result' | 'guru';
