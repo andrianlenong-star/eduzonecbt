@@ -254,10 +254,12 @@ export const PortalView: React.FC<PortalViewProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-black uppercase tracking-tight leading-tight">
-              {settings.sekolah}
+              {settings.sekolah && !settings.sekolah.toLowerCase().includes('unity')
+                ? settings.sekolah
+                : 'Edu Zone'}
             </h2>
             <p className="text-xs text-blue-200 font-semibold tracking-wider uppercase">
-              Portal Asesmen Unity School
+              portal asesmen Edu Zone
             </p>
           </div>
         </div>
@@ -317,7 +319,9 @@ export const PortalView: React.FC<PortalViewProps> = ({
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight uppercase leading-none mb-6 drop-shadow-md">
-          Asesmen Unity School
+          {settings.judul && !settings.judul.toLowerCase().includes('unity')
+            ? settings.judul
+            : 'Asesmen Edu Zone CBT'}
         </h1>
 
         {/* Bagian Logo Sekolah di Bagian Tengah Interface */}
@@ -391,7 +395,9 @@ export const PortalView: React.FC<PortalViewProps> = ({
             {/* Status / Feedback & Actions */}
             <div className="mt-4 flex flex-col items-center gap-1.5 w-full text-center">
               <span className="text-xs font-black uppercase tracking-wider text-yellow-300">
-                {settings.sekolah || 'SD UNITY INTERNASIONAL'}
+                {settings.sekolah && !settings.sekolah.toLowerCase().includes('unity')
+                  ? settings.sekolah
+                  : 'Edu Zone'}
               </span>
 
               {/* Tombol aksi ganti logo (Unggah Berkas, Link URL, Reset Default) HANYA untuk guru / bukan tampilan siswa */}
@@ -576,7 +582,7 @@ export const PortalView: React.FC<PortalViewProps> = ({
 
       {/* Footer */}
       <footer className="max-w-6xl mx-auto w-full text-center py-4 border-t border-white/10 text-xs text-blue-200/60 font-semibold tracking-wider relative z-10">
-        &copy; {new Date().getFullYear()} {settings.sekolah} • SD UNITY Computer Based Testing System
+        &copy; {new Date().getFullYear()} {settings.sekolah && !settings.sekolah.toLowerCase().includes('unity') ? settings.sekolah : 'Edu Zone'} • Edu Zone Computer Based Testing System
       </footer>
 
       {/* Quick Share Modal on Portal */}

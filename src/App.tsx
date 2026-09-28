@@ -95,9 +95,9 @@ export default function App() {
           const savedLogo = localStorage.getItem('unity_logo_v1');
           const updatedList = normalized.map((s: SubjectPackage) => {
             const currentJudul = s.settings?.judul;
-            const updatedJudul = (!currentJudul || currentJudul.includes('ANBK') || currentJudul.includes('Asesmen Nasional'))
-              ? "Asesmen Unity School"
-              : "Asesmen Unity School";
+            const updatedJudul = (!currentJudul || currentJudul.toLowerCase().includes('unity') || currentJudul.includes('ANBK') || currentJudul.includes('Asesmen Nasional'))
+              ? "Asesmen Edu Zone CBT"
+              : currentJudul;
 
             // Pastikan mata pelajaran Literasi (ANBK) memuat lengkap 35 butir soal resmi
             const isLiterasi = s.id === 'literasi-numerasi' || s.kode === 'ANBK' || s.nama.toLowerCase().includes('literasi');
@@ -109,7 +109,10 @@ export default function App() {
               questions: finalQuestions,
               settings: {
                 ...s.settings,
-                judul: "Asesmen Unity School",
+                judul: updatedJudul,
+                sekolah: (!s.settings?.sekolah || s.settings.sekolah.toLowerCase().includes('unity'))
+                  ? "Edu Zone"
+                  : s.settings.sekolah,
                 logoUrl: savedLogo || s.settings.logoUrl || DEFAULT_SETTINGS.logoUrl,
               }
             };
@@ -138,7 +141,10 @@ export default function App() {
         if (legacySettings) cloned[0].settings = { ...cloned[0].settings, ...JSON.parse(legacySettings) };
         if (legacyResults) cloned[0].results = JSON.parse(legacyResults);
         cloned.forEach((c) => {
-          c.settings.judul = "Asesmen Unity School";
+          c.settings.judul = (!c.settings.judul || c.settings.judul.toLowerCase().includes('unity')) ? "Asesmen Edu Zone CBT" : c.settings.judul;
+          if (!c.settings.sekolah || c.settings.sekolah.toLowerCase().includes('unity')) {
+            c.settings.sekolah = "Edu Zone";
+          }
           if (savedLogo) c.settings.logoUrl = savedLogo;
         });
         return cloned;
@@ -150,7 +156,12 @@ export default function App() {
     if (savedLogo) {
       return DEFAULT_SUBJECTS.map((s) => ({
         ...s,
-        settings: { ...s.settings, judul: "Asesmen Unity School", logoUrl: savedLogo },
+        settings: {
+          ...s.settings,
+          judul: (!s.settings.judul || s.settings.judul.toLowerCase().includes('unity')) ? "Asesmen Edu Zone CBT" : s.settings.judul,
+          sekolah: (!s.settings.sekolah || s.settings.sekolah.toLowerCase().includes('unity')) ? "Edu Zone" : s.settings.sekolah,
+          logoUrl: savedLogo,
+        },
       }));
     }
     return DEFAULT_SUBJECTS;
@@ -459,6 +470,36 @@ export default function App() {
       }
     }
   }, [subjects, questions, settings, results]);
+
+  // Migrasi otomatis jika masih ada cache judul/sekolah lama (Unity School -> Edu Zone)
+  useEffect(() => {
+    setSubjects((prev) => {
+      let changed = false;
+      const updated = prev.map((s) => {
+        const isUnityJudul = !s.settings?.judul || s.settings.judul.toLowerCase().includes('unity');
+        const isUnitySekolah = !s.settings?.sekolah || s.settings.sekolah.toLowerCase().includes('unity');
+        if (isUnityJudul || isUnitySekolah) {
+          changed = true;
+          return {
+            ...s,
+            settings: {
+              ...s.settings,
+              judul: isUnityJudul ? 'Asesmen Edu Zone CBT' : s.settings.judul,
+              sekolah: isUnitySekolah ? 'Edu Zone' : s.settings.sekolah,
+            },
+          };
+        }
+        return s;
+      });
+      if (changed) {
+        try {
+          localStorage.setItem('unity_subjects_v4', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      }
+      return prev;
+    });
+  }, []);
 
   // Real-time Cloud sync dengan Firebase Firestore
   useEffect(() => {

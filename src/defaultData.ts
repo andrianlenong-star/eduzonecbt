@@ -2,9 +2,9 @@ import { Question, ExamSettings, SubjectPackage } from './types';
 import { ANBK_LITERASI_35_QUESTIONS } from './anbkLiterasiData';
 
 export const DEFAULT_SETTINGS: ExamSettings = {
-  judul: "Asesmen Unity School",
+  judul: "Asesmen Edu Zone CBT",
   mapel: "Literasi (ANBK) Bahasa Indonesia",
-  sekolah: "SD UNITY INTERNASIONAL",
+  sekolah: "Edu Zone",
   logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
   tahunAjaran: "2025/2026",
   durasiMenit: 75,
@@ -25,11 +25,11 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     kelas: "Kelas 6 SD",
     passwordBankSoal: "guru123",
     color: "blue",
-    deskripsi: "Asesmen Unity School dengan 35 butir soal standar kurikulum nasional.",
+    deskripsi: "Asesmen Edu Zone CBT dengan 35 butir soal standar kurikulum nasional.",
     settings: {
-      judul: "Asesmen Unity School",
+      judul: "Asesmen Edu Zone CBT",
       mapel: "Literasi (ANBK) Bahasa Indonesia",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 75,
@@ -52,7 +52,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Penilaian Sumatif Akhir Semester Matematika",
       mapel: "Matematika",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 75,
@@ -126,7 +126,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif IPA & Lingkungan Hidup",
       mapel: "Ilmu Pengetahuan Alam (IPA)",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -196,7 +196,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Bahasa Indonesia",
       mapel: "Bahasa Indonesia",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -257,7 +257,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Pendidikan Pancasila & Kewarganegaraan",
       mapel: "Pendidikan Pancasila / PKn",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 50,
@@ -318,7 +318,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Ilmu Pengetahuan Sosial (IPS)",
       mapel: "Ilmu Pengetahuan Sosial (IPS)",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -388,7 +388,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Summative Assessment English Language",
       mapel: "Bahasa Inggris",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -458,7 +458,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Pendidikan Agama & Budi Pekerti",
       mapel: "Pendidikan Agama & Budi Pekerti",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -528,7 +528,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Pendidikan Jasmani, Olahraga, & Kesehatan",
       mapel: "PJOK",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 50,
@@ -598,7 +598,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Seni Budaya & Prakarya",
       mapel: "Seni Budaya & Prakarya (SBdP)",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -668,7 +668,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Informatika & Literasi Digital",
       mapel: "Informatika & Literasi Digital",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 50,
@@ -738,7 +738,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Bahasa & Sastra Daerah (Mulok)",
       mapel: "Bahasa Daerah",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 50,
@@ -808,7 +808,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Sumatif Sejarah & Wawasan Kebangsaan",
       mapel: "Sejarah & Kebangsaan",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 60,
@@ -878,7 +878,7 @@ export const DEFAULT_SUBJECTS: SubjectPackage[] = [
     settings: {
       judul: "Asesmen Karakter, Bimbingan Konseling & Anti-Bullying",
       mapel: "Bimbingan Konseling & Karakter",
-      sekolah: "SD UNITY INTERNASIONAL",
+      sekolah: "Edu Zone",
       logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
       tahunAjaran: "2025/2026",
       durasiMenit: 45,

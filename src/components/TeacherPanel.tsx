@@ -1014,7 +1014,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
       logoUrl: setLogoUrl.trim() || settings.logoUrl,
       tahunAjaran: setTahunAjaran.trim() || '2025/2026',
       durasiMenit: Number(setDurasi) || 60,
-      token: setToken.trim().toUpperCase() || 'UNITY2026',
+      token: setToken.trim().toUpperCase() || 'EDUZONE2026',
       adminPass: setAdminPass.trim() || '112233',
       acakSoal: settings.acakSoal,
       tampilkanNilai: setTampilkanNilai,
@@ -2996,7 +2996,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                       <span>✨ Buat dengan AI</span>
                     </button>
                     <span className="text-[11px] font-bold text-slate-400">
-                      Format Standar SD UNITY
+                      Format Standar Edu Zone CBT
                     </span>
                   </div>
                 </div>
@@ -3842,7 +3842,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                       type="text"
                       value={setSekolah}
                       onChange={(e) => setSetSekolah(e.target.value)}
-                      placeholder="Contoh: SD UNITY INTERNASIONAL"
+                      placeholder="Contoh: SD Edu Zone"
                       className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition"
                       required
                     />

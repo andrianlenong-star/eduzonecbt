@@ -74,7 +74,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </h2>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
             {role === 'siswa'
-              ? (settings.judul || 'Asesmen Unity School')
+              ? (settings.judul && !settings.judul.toLowerCase().includes('unity') ? settings.judul : 'Asesmen Edu Zone CBT')
               : 'Otoritas Pengelolaan Ujian & Bank Soal'}
           </p>
         </div>
