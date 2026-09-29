@@ -49,6 +49,7 @@ export async function submitExamResultToCloud(
       mapelId: extra?.mapelId || result.mapelId || 'literasi-numerasi',
       mapelNama: extra?.mapelNama || result.mapelNama || '',
       nisn: extra?.nisn || result.nisn || '',
+      answers: result.answers || {},
       createdAt: new Date().toISOString(),
     };
 

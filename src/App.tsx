@@ -93,16 +93,23 @@ export default function App() {
             passwordBankSoal: s.passwordBankSoal || 'guru123',
           }));
           const savedLogo = localStorage.getItem('unity_logo_v1');
+          const savedLogoShape = (localStorage.getItem('unity_logo_shape_v1') as 'rounded' | 'circle' | 'square') || 'rounded';
+          const savedLogoFit = (localStorage.getItem('unity_logo_fit_v1') as 'cover' | 'contain') || 'contain';
           const updatedList = normalized.map((s: SubjectPackage) => {
             const currentJudul = s.settings?.judul;
-            const updatedJudul = (!currentJudul || currentJudul.toLowerCase().includes('unity') || currentJudul.includes('ANBK') || currentJudul.includes('Asesmen Nasional'))
-              ? "Asesmen Edu Zone CBT"
-              : currentJudul;
+            const updatedJudul = (!currentJudul || currentJudul.toLowerCase().includes('unity') || currentJudul.includes('ANBK') || currentJudul.includes('Asesmen Nasional') || currentJudul.includes('Edu Zone'))
+              ? "Asesmen EduZone CBT"
+              : currentJudul.replace(/Edu\s+Zone/gi, 'EduZone');
 
             // Pastikan mata pelajaran Literasi (ANBK) memuat lengkap 35 butir soal resmi
             const isLiterasi = s.id === 'literasi-numerasi' || s.kode === 'ANBK' || s.nama.toLowerCase().includes('literasi');
             const shouldImport35 = isLiterasi && (!s.questions || s.questions.length < 35 || !s.questions.some(q => q.id === 'anbk-lit-35'));
             const finalQuestions = shouldImport35 ? ANBK_LITERASI_35_QUESTIONS : (s.questions || []);
+
+            const currentSekolah = s.settings?.sekolah;
+            const updatedSekolah = (!currentSekolah || currentSekolah.toLowerCase().includes('unity') || currentSekolah === 'Edu Zone')
+              ? "EduZone"
+              : currentSekolah.replace(/Edu\s+Zone/gi, 'EduZone');
 
             return {
               ...s,
@@ -110,10 +117,10 @@ export default function App() {
               settings: {
                 ...s.settings,
                 judul: updatedJudul,
-                sekolah: (!s.settings?.sekolah || s.settings.sekolah.toLowerCase().includes('unity'))
-                  ? "Edu Zone"
-                  : s.settings.sekolah,
+                sekolah: updatedSekolah,
                 logoUrl: savedLogo || s.settings.logoUrl || DEFAULT_SETTINGS.logoUrl,
+                logoShape: s.settings.logoShape || savedLogoShape,
+                logoFit: s.settings.logoFit || savedLogoFit,
               }
             };
           });
@@ -140,12 +147,18 @@ export default function App() {
         }
         if (legacySettings) cloned[0].settings = { ...cloned[0].settings, ...JSON.parse(legacySettings) };
         if (legacyResults) cloned[0].results = JSON.parse(legacyResults);
+        const savedLogoShape = (localStorage.getItem('unity_logo_shape_v1') as 'rounded' | 'circle' | 'square') || 'rounded';
+        const savedLogoFit = (localStorage.getItem('unity_logo_fit_v1') as 'cover' | 'contain') || 'contain';
         cloned.forEach((c) => {
-          c.settings.judul = (!c.settings.judul || c.settings.judul.toLowerCase().includes('unity')) ? "Asesmen Edu Zone CBT" : c.settings.judul;
-          if (!c.settings.sekolah || c.settings.sekolah.toLowerCase().includes('unity')) {
-            c.settings.sekolah = "Edu Zone";
+          c.settings.judul = (!c.settings.judul || c.settings.judul.toLowerCase().includes('unity') || c.settings.judul.includes('Edu Zone')) ? "Asesmen EduZone CBT" : c.settings.judul.replace(/Edu\s+Zone/gi, 'EduZone');
+          if (!c.settings.sekolah || c.settings.sekolah.toLowerCase().includes('unity') || c.settings.sekolah === 'Edu Zone') {
+            c.settings.sekolah = "EduZone";
+          } else {
+            c.settings.sekolah = c.settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone');
           }
           if (savedLogo) c.settings.logoUrl = savedLogo;
+          c.settings.logoShape = c.settings.logoShape || savedLogoShape;
+          c.settings.logoFit = c.settings.logoFit || savedLogoFit;
         });
         return cloned;
       }
@@ -153,14 +166,18 @@ export default function App() {
       console.error(e);
     }
     const savedLogo = typeof window !== 'undefined' ? localStorage.getItem('unity_logo_v1') : null;
+    const savedLogoShape = typeof window !== 'undefined' ? (localStorage.getItem('unity_logo_shape_v1') as 'rounded' | 'circle' | 'square') || 'rounded' : 'rounded';
+    const savedLogoFit = typeof window !== 'undefined' ? (localStorage.getItem('unity_logo_fit_v1') as 'cover' | 'contain') || 'contain' : 'contain';
     if (savedLogo) {
       return DEFAULT_SUBJECTS.map((s) => ({
         ...s,
         settings: {
           ...s.settings,
-          judul: (!s.settings.judul || s.settings.judul.toLowerCase().includes('unity')) ? "Asesmen Edu Zone CBT" : s.settings.judul,
-          sekolah: (!s.settings.sekolah || s.settings.sekolah.toLowerCase().includes('unity')) ? "Edu Zone" : s.settings.sekolah,
+          judul: (!s.settings.judul || s.settings.judul.toLowerCase().includes('unity') || s.settings.judul.includes('Edu Zone')) ? "Asesmen EduZone CBT" : s.settings.judul.replace(/Edu\s+Zone/gi, 'EduZone'),
+          sekolah: (!s.settings.sekolah || s.settings.sekolah.toLowerCase().includes('unity') || s.settings.sekolah === 'Edu Zone') ? "EduZone" : s.settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone'),
           logoUrl: savedLogo,
+          logoShape: s.settings.logoShape || savedLogoShape,
+          logoFit: s.settings.logoFit || savedLogoFit,
         },
       }));
     }
@@ -326,6 +343,24 @@ export default function App() {
     });
   };
 
+  const handleUpdateLogoShape = (newShape: 'rounded' | 'circle' | 'square', newFit?: 'cover' | 'contain') => {
+    try {
+      localStorage.setItem('unity_logo_shape_v1', newShape);
+      if (newFit) localStorage.setItem('unity_logo_fit_v1', newFit);
+    } catch {}
+    setSubjects((prev) =>
+      prev.map((s) => ({
+        ...s,
+        settings: {
+          ...s.settings,
+          logoShape: newShape,
+          logoFit: newFit !== undefined ? newFit : (s.settings.logoFit || 'contain'),
+        },
+        updatedAt: new Date().toISOString(),
+      }))
+    );
+  };
+
   const handleUpdateResults = (newResults: ExamResult[]) => {
     setSubjects((prev) =>
       prev.map((s) => (s.id === activeSubjectId ? { ...s, results: newResults } : s))
@@ -471,21 +506,28 @@ export default function App() {
     }
   }, [subjects, questions, settings, results]);
 
-  // Migrasi otomatis jika masih ada cache judul/sekolah lama (Unity School -> Edu Zone)
+  // Migrasi otomatis jika masih ada cache judul/sekolah lama atau logoFit cover yang terpotong
   useEffect(() => {
+    try {
+      if (localStorage.getItem('unity_logo_fit_v1') === 'cover') {
+        localStorage.setItem('unity_logo_fit_v1', 'contain');
+      }
+    } catch {}
     setSubjects((prev) => {
       let changed = false;
       const updated = prev.map((s) => {
-        const isUnityJudul = !s.settings?.judul || s.settings.judul.toLowerCase().includes('unity');
-        const isUnitySekolah = !s.settings?.sekolah || s.settings.sekolah.toLowerCase().includes('unity');
-        if (isUnityJudul || isUnitySekolah) {
+        const isUnityJudul = !s.settings?.judul || s.settings.judul.toLowerCase().includes('unity') || s.settings.judul.includes('Edu Zone');
+        const isUnitySekolah = !s.settings?.sekolah || s.settings.sekolah.toLowerCase().includes('unity') || s.settings.sekolah === 'Edu Zone' || s.settings.sekolah.includes('Edu Zone');
+        const isCoverFit = s.settings?.logoFit === 'cover';
+        if (isUnityJudul || isUnitySekolah || isCoverFit) {
           changed = true;
           return {
             ...s,
             settings: {
               ...s.settings,
-              judul: isUnityJudul ? 'Asesmen Edu Zone CBT' : s.settings.judul,
-              sekolah: isUnitySekolah ? 'Edu Zone' : s.settings.sekolah,
+              judul: isUnityJudul ? 'Asesmen EduZone CBT' : s.settings.judul.replace(/Edu\s+Zone/gi, 'EduZone'),
+              sekolah: isUnitySekolah ? 'EduZone' : s.settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone'),
+              logoFit: isCoverFit ? 'contain' : (s.settings.logoFit || 'contain'),
             },
           };
         }
@@ -690,6 +732,7 @@ export default function App() {
       pelanggaran: violations,
       mapelId: activeSubjectId,
       mapelNama: activeSubject?.nama || settings.mapel,
+      answers: userAnswers,
     };
 
     // Prepend result to current active subject's results locally
@@ -727,6 +770,7 @@ export default function App() {
           isSiswaOnly={isSiswaOnly}
           onToggleSiswaOnly={handleToggleSiswaOnly}
           onUpdateLogo={handleUpdateLogo}
+          onUpdateLogoShape={handleUpdateLogoShape}
         />
       )}
 

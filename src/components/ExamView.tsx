@@ -19,6 +19,7 @@ import {
   Type,
 } from 'lucide-react';
 import { Question, ExamSettings } from '../types';
+import { getLogoShapeClass, getLogoFitClass } from '../utils/logoHelper';
 
 interface ExamViewProps {
   questions: Question[];
@@ -173,11 +174,11 @@ export const ExamView: React.FC<ExamViewProps> = ({
       {/* Top Header */}
       <header className="bg-blue-700 text-white px-6 py-3.5 flex items-center justify-between shadow-md shrink-0 border-b-4 border-yellow-400 z-20">
         <div className="flex items-center gap-3">
-          <div className="bg-white p-1.5 rounded-xl shadow-sm">
+          <div className="w-9 h-9 flex items-center justify-center shrink-0">
             <img
               src={settings.logoUrl || "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_Tut_Wuri_Handayani.png/480px-Logo_Tut_Wuri_Handayani.png"}
               alt="Logo"
-              className="h-8 w-8 object-contain"
+              className="w-full h-full object-contain rounded-xl drop-shadow-sm"
               referrerPolicy="no-referrer"
               crossOrigin="anonymous"
               onError={(e) => {

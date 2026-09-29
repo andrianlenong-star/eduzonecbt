@@ -51,8 +51,10 @@ import {
   Lock,
   Unlock,
   EyeOff,
+  BarChart3,
 } from 'lucide-react';
 import { Question, QuestionType, Difficulty, ExamSettings, ExamResult, SubjectPackage } from '../types';
+import { getLogoShapeClass, getLogoFitClass } from '../utils/logoHelper';
 import { ANBK_LITERASI_35_QUESTIONS } from '../anbkLiterasiData';
 import { generateStandaloneHtml } from '../utils/exportHtml';
 import { copyTextToClipboard } from '../utils/clipboard';
@@ -69,6 +71,7 @@ import {
 } from '../utils/questionImporter';
 import { AiQuestionGeneratorModal } from './AiQuestionGeneratorModal';
 import { ResultsAnalyticsCharts } from './ResultsAnalyticsCharts';
+import { ItemAnalysisView } from './ItemAnalysisView';
 
 const DEFAULT_TUT_WURI_LOGO =
   'https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png';
@@ -110,7 +113,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
   onUpdateResults,
   onExit,
 }) => {
-  const [activeTab, setActiveTab] = useState<'mapel' | 'bank' | 'settings' | 'results' | 'share' | 'export'>('bank');
+  const [activeTab, setActiveTab] = useState<'mapel' | 'bank' | 'settings' | 'results' | 'analisis' | 'share' | 'export'>('bank');
   const [copyLinkSuccess, setCopyLinkSuccess] = useState(false);
   const [copyWaSuccess, setCopyWaSuccess] = useState(false);
   const [csvFeedback, setCsvFeedback] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -219,6 +222,8 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
   const [setMapel, setSetMapel] = useState(settings.mapel);
   const [setSekolah, setSetSekolah] = useState(settings.sekolah);
   const [setLogoUrl, setSetLogoUrl] = useState(settings.logoUrl);
+  const [setLogoShape, setSetLogoShape] = useState<'rounded' | 'circle' | 'square'>(settings.logoShape || 'rounded');
+  const [setLogoFit, setSetLogoFit] = useState<'cover' | 'contain'>(settings.logoFit || 'cover');
   const [setTahunAjaran, setSetTahunAjaran] = useState(settings.tahunAjaran || '2025/2026');
   const [setDurasi, setSetDurasi] = useState(settings.durasiMenit);
   const [setToken, setSetToken] = useState(settings.token);
@@ -351,6 +356,11 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
           title: 'Rekap Hasil Nilai Siswa',
           desc: 'Halaman Rekap Nilai memuat rekapan nilai seluruh siswa, rincian jawaban peserta, waktu pengerjaan, dan berkas ekspor nilai.',
         };
+      case 'analisis':
+        return {
+          title: 'Analisis Statistik Butir Soal (Psikometri)',
+          desc: 'Halaman Analisis Butir Soal memuat evaluasi tingkat kesukaran, daya pembeda, efektivitas pengecoh, dan reliabilitas tes berdasarkan hasil ujian siswa.',
+        };
       case 'share':
         return {
           title: 'Bagikan Tautan & Token Ke Siswa',
@@ -454,6 +464,8 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
       setSetJudul(current.settings.judul);
       setSetSekolah(current.settings.sekolah);
       setSetLogoUrl(current.settings.logoUrl);
+      setSetLogoShape(current.settings.logoShape || 'rounded');
+      setSetLogoFit(current.settings.logoFit || 'cover');
       setSetTahunAjaran(current.settings.tahunAjaran || '2025/2026');
       setSetDurasi(current.settings.durasiMenit);
       setSetToken(current.settings.token);
@@ -1012,6 +1024,8 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
       mapel: setMapel.trim() || settings.mapel,
       sekolah: setSekolah.trim() || settings.sekolah,
       logoUrl: setLogoUrl.trim() || settings.logoUrl,
+      logoShape: setLogoShape,
+      logoFit: setLogoFit,
       tahunAjaran: setTahunAjaran.trim() || '2025/2026',
       durasiMenit: Number(setDurasi) || 60,
       token: setToken.trim().toUpperCase() || 'EDUZONE2026',
@@ -1284,6 +1298,84 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
     );
   };
 
+  const handleGenerateSimulatedResponses = () => {
+    if (!questions || questions.length === 0) return;
+    const sampleNames = [
+      'Ahmad Fauzi', 'Aisyah Putri', 'Budi Santoso', 'Citra Dewi', 'Dimas Pratama',
+      'Eka Rahmawati', 'Fajar Ramadhan', 'Gita Lestari', 'Hadi Kurniawan', 'Indah Permata',
+      'Joko Widodo', 'Kartika Sari', 'Luki Hakim', 'Mega Utami', 'Nanda Pratama',
+      'Oki Setiawan', 'Putri Ayu', 'Rian Hidayat', 'Siti Nurhaliza', 'Taufik Hidayat',
+      'Umar Faruq', 'Vina Panduwinata', 'Wahyu Setiaji', 'Yusuf Mansur', 'Zahra Amelia'
+    ];
+
+    const newSimulatedResults: ExamResult[] = sampleNames.map((name, sIdx) => {
+      const ability = 0.85 - (sIdx / sampleNames.length) * 0.55 + (Math.random() * 0.2 - 0.1);
+      const studentAnswers: Record<number, string | string[]> = {};
+      let correct = 0;
+
+      questions.forEach((q, qIdx) => {
+        const isHots = q.difficulty === 'HOTS';
+        const probCorrect = Math.max(0.15, Math.min(0.95, ability - (isHots ? 0.15 : 0)));
+        const willBeCorrect = Math.random() < probCorrect;
+
+        if (q.tipe === 'PGK') {
+          const correctArr = Array.isArray(q.answer) ? q.answer : String(q.answer).split(',').map((s) => s.trim());
+          if (willBeCorrect) {
+            studentAnswers[qIdx] = correctArr;
+            correct++;
+          } else {
+            studentAnswers[qIdx] = [correctArr[0] || 'A'];
+          }
+        } else if (q.tipe === 'BS') {
+          if (willBeCorrect) {
+            studentAnswers[qIdx] = String(q.answer);
+            correct++;
+          } else {
+            studentAnswers[qIdx] = String(q.answer).toLowerCase() === 'benar' ? 'Salah' : 'Benar';
+          }
+        } else if (q.tipe === 'ISIAN' || q.tipe === 'URAIAN') {
+          if (willBeCorrect) {
+            studentAnswers[qIdx] = String(q.answer);
+            correct++;
+          } else {
+            studentAnswers[qIdx] = 'Jawaban siswa belum tepat';
+          }
+        } else {
+          const correctKey = String(q.answer).toUpperCase();
+          if (willBeCorrect) {
+            studentAnswers[qIdx] = correctKey;
+            correct++;
+          } else {
+            const wrongOptions = ['A', 'B', 'C', 'D'].filter((opt) => opt !== correctKey);
+            studentAnswers[qIdx] = wrongOptions[Math.floor(Math.random() * wrongOptions.length)] || 'B';
+          }
+        }
+      });
+
+      const score = Math.round((correct / (questions.length || 1)) * 100);
+      return {
+        id: `sim-${Date.now()}-${sIdx}`,
+        nama: name,
+        kelas: settings.sekolah ? 'Kelas 6' : 'Kelas 5',
+        nilai: score,
+        benar: correct,
+        totalSoal: questions.length,
+        selesaiPada: `${Math.floor(Math.random() * 30 + 35)} Menit`,
+        pelanggaran: 0,
+        mapelId: activeSubjectId,
+        mapelNama: settings.mapel,
+        answers: studentAnswers,
+      };
+    });
+
+    onUpdateResults?.([...newSimulatedResults, ...(results || [])]);
+    setCsvFeedback({
+      type: 'success',
+      message: '✓ Berhasil men-generate 25 sampel respon siswa untuk uji psikometri butir soal!',
+    });
+    setTimeout(() => setCsvFeedback(null), 4000);
+  };
+
   // Export Standalone Single HTML
   const handleDownloadStandaloneHtml = () => {
     const htmlCode = generateStandaloneHtml(questions, settings, results);
@@ -1534,12 +1626,12 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
       {/* Header */}
       <header className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between shadow-lg shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-md overflow-hidden shrink-0 border border-slate-700">
+          <div className="w-11 h-11 flex items-center justify-center shrink-0">
             {settings.logoUrl ? (
               <img
                 src={settings.logoUrl}
                 alt="Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain rounded-2xl drop-shadow-sm"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                 }}
@@ -1721,6 +1813,23 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
           >
             <Users className="w-4 h-4" />
             <span>Rekap Hasil Nilai ({results.length})</span>
+            {!isAdminUnlocked ? (
+              <Lock className="w-3.5 h-3.5 text-amber-500 ml-0.5" />
+            ) : (
+              <Unlock className="w-3.5 h-3.5 text-emerald-400 ml-0.5" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('analisis')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition whitespace-nowrap ${
+              activeTab === 'analisis'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Analisis Butir Soal</span>
             {!isAdminUnlocked ? (
               <Lock className="w-3.5 h-3.5 text-amber-500 ml-0.5" />
             ) : (
@@ -2996,7 +3105,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                       <span>✨ Buat dengan AI</span>
                     </button>
                     <span className="text-[11px] font-bold text-slate-400">
-                      Format Standar Edu Zone CBT
+                      Format Standar EduZone CBT
                     </span>
                   </div>
                 </div>
@@ -3643,12 +3752,12 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
               </div>
 
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-                <div className="w-16 h-16 rounded-2xl bg-white p-2 shadow-md flex items-center justify-center shrink-0 border border-white/20">
+                <div className="w-16 h-16 flex items-center justify-center shrink-0">
                   {setLogoUrl ? (
                     <img
                       src={setLogoUrl}
                       alt="Logo Sekolah"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain rounded-3xl drop-shadow-md"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = 'none';
                       }}
@@ -3782,12 +3891,12 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                   {/* Logo Preview & Quick Reset Options */}
                   <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-white p-1 border border-slate-200 shadow-sm flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 flex items-center justify-center shrink-0">
                         {setLogoUrl ? (
                           <img
                             src={setLogoUrl}
                             alt="Pratinjau Logo"
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain rounded-2xl drop-shadow-sm"
                           />
                         ) : (
                           <ImageIcon className="w-5 h-5 text-slate-300" />
@@ -3809,7 +3918,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => setSetLogoUrl(DEFAULT_TUT_WURI_LOGO)}
-                        className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-[11px] font-bold text-slate-700 flex items-center gap-1.5 transition"
+                        className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-[11px] font-bold text-slate-700 flex items-center gap-1.5 transition cursor-pointer"
                         title="Gunakan Logo Tut Wuri Handayani Kemendikbud"
                       >
                         <RefreshCw className="w-3.5 h-3.5 text-blue-600" />
@@ -3820,7 +3929,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => setSetLogoUrl('')}
-                          className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-[11px] font-bold text-rose-700 flex items-center gap-1.5 transition"
+                          className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-[11px] font-bold text-rose-700 flex items-center gap-1.5 transition cursor-pointer"
                           title="Hapus Logo"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -3842,7 +3951,7 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                       type="text"
                       value={setSekolah}
                       onChange={(e) => setSetSekolah(e.target.value)}
-                      placeholder="Contoh: SD Edu Zone"
+                      placeholder="Contoh: SD EduZone"
                       className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition"
                       required
                     />
@@ -4184,7 +4293,16 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('analisis')}
+                  className="px-3.5 py-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl text-xs font-bold text-white border border-white/25 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  title="Buka evaluasi tingkat kesukaran dan daya pembeda butir soal"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 text-yellow-300" />
+                  <span>Analisis Butir Soal</span>
+                </button>
                 <span className="px-3.5 py-1.5 bg-black/20 backdrop-blur-md rounded-xl text-xs font-mono font-bold text-white border border-white/10 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                   <span>{displayedResults.length} Nilai Terkumpul</span>
@@ -4675,6 +4793,19 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* TAB: ANALISIS STATISTIK BUTIR SOAL */}
+        {activeTab === 'analisis' && (
+          <div className="max-w-6xl mx-auto space-y-6 pb-12">
+            <ItemAnalysisView
+              questions={questions}
+              results={displayedResults}
+              settings={settings}
+              onNavigateToBank={() => setActiveTab('bank')}
+              onSimulateData={handleGenerateSimulatedResponses}
+            />
           </div>
         )}
 

@@ -16,6 +16,8 @@ export interface ExamSettings {
   mapel: string;
   sekolah: string;
   logoUrl: string;
+  logoShape?: 'rounded' | 'circle' | 'square';
+  logoFit?: 'cover' | 'contain';
   tahunAjaran: string;
   durasiMenit: number;
   token: string;
@@ -36,6 +38,7 @@ export interface ExamResult {
   mapelId?: string;
   mapelNama?: string;
   nisn?: string;
+  answers?: Record<number, string | string[]>;
 }
 
 export interface SubjectPackage {
