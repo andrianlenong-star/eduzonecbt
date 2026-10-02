@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, CheckCircle2, XCircle, RotateCcw, Eye, EyeOff, ShieldCheck, ShieldAlert, BookOpen } from 'lucide-react';
+import { Award, CheckCircle2, XCircle, RotateCcw, Eye, EyeOff, ShieldCheck, ShieldAlert, BookOpen, Camera } from 'lucide-react';
 import { Question, ExamSettings, ExamResult } from '../types';
 
 interface ResultViewProps {
@@ -52,27 +52,48 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0056b3] via-[#004b9e] to-[#003875] flex items-center justify-center p-6 text-slate-800">
-      <div className="max-w-2xl w-full bg-white rounded-[3.5rem] shadow-2xl p-8 sm:p-12 border-b-[12px] border-blue-600 my-8">
-        {/* Header Icon */}
-        <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl font-black shadow-inner">
-          <Award className="w-10 h-10" />
-        </div>
-
-        <div className="text-center mb-8">
+      <div className="max-w-2xl w-full bg-white rounded-[3.5rem] shadow-2xl p-8 sm:p-12 border-b-[12px] border-cyan-600 my-8">
+        {/* School Logo Oval & Header Icon */}
+        <div className="text-center mb-6">
+          <div className="w-28 h-20 sm:w-32 sm:h-24 mx-auto mb-3 bg-white border-3 border-cyan-500 rounded-[999px] px-4 py-2 flex items-center justify-center shadow-lg">
+            {settings.logoUrl ? (
+              <img
+                src={settings.logoUrl}
+                alt="Logo Sekolah"
+                className="w-full h-full object-contain rounded-[999px]"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <Award className="w-10 h-10 text-cyan-600" />
+            )}
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-100 text-cyan-800 text-[10px] font-black uppercase tracking-widest mb-1.5 border border-cyan-200">
+            <span>EDUZONE CBT • LEMBAR HASIL PESERTA</span>
+          </div>
           <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-900 mb-1">
             Ujian Telah Selesai!
           </h2>
           <p className="text-slate-500 font-bold text-sm">
             {result.nama} • Kelas {result.kelas}
           </p>
-          <div className="mt-2.5 inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-wider border border-blue-200 shadow-2xs">
-            <BookOpen className="w-4 h-4 text-blue-600" />
-            <span>Mata Pelajaran: {result.mapelNama || settings.mapel || settings.judul}</span>
+          <div className="mt-2.5 inline-flex items-center gap-1.5 bg-cyan-50 text-cyan-900 px-4 py-1.5 rounded-2xl text-xs font-black uppercase tracking-wider border border-cyan-200 shadow-2xs">
+            <BookOpen className="w-4 h-4 text-cyan-600" />
+            <span>{result.mapelNama || settings.mapel || 'Ujian Sekolah'} • {settings.sekolah || 'EduZone'}</span>
           </div>
-          <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1.5">
-            {settings.judul}
-          </p>
         </div>
+
+        {/* Auto-Termination Alert if triggered */}
+        {result.isAutoTerminated && (
+          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-left text-xs font-medium space-y-1">
+            <div className="flex items-center gap-2 font-black text-rose-800 uppercase text-xs">
+              <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>Ujian Diakhiri Otomatis oleh Sistem Integritas</span>
+            </div>
+            <p>{result.autoTerminationReason || 'Terdeteksi berpindah tab atau keluar dari mode ujian layar penuh.'}</p>
+          </div>
+        )}
 
         {/* Score Card */}
         {settings.tampilkanNilai ? (
@@ -117,6 +138,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
               : `${result.pelanggaran} Kali Terdeteksi Pindah Tab`}
           </span>
         </div>
+
+        {/* Proctoring Photos Preview if available */}
+        {result.proctoringPhotos && result.proctoringPhotos.length > 0 && (
+          <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <Camera className="w-4 h-4 text-cyan-600" />
+                <span>Foto Rekaman Kamera Pengawas ({result.proctoringPhotos.length} Foto)</span>
+              </span>
+              <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                ● Terekam
+              </span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+              {result.proctoringPhotos.map((photo, pIdx) => (
+                <img
+                  key={pIdx}
+                  src={photo}
+                  alt={`Proctoring Snapshot ${pIdx + 1}`}
+                  className="w-28 h-20 object-cover rounded-xl border border-slate-300 shadow-xs shrink-0"
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">

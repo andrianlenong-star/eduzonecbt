@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActiveView, Question, ExamSettings, ExamResult, SubjectPackage } from './types';
+import { LogoShape, LogoFit } from './utils/logoHelper';
 import { DEFAULT_SETTINGS, DEFAULT_QUESTIONS, DEFAULT_SUBJECTS } from './defaultData';
 import { ANBK_LITERASI_35_QUESTIONS } from './anbkLiterasiData';
 import { PortalView } from './components/PortalView';
@@ -97,9 +98,9 @@ export default function App() {
           const savedLogoFit = (localStorage.getItem('unity_logo_fit_v1') as 'cover' | 'contain') || 'contain';
           const updatedList = normalized.map((s: SubjectPackage) => {
             const currentJudul = s.settings?.judul;
-            const updatedJudul = (!currentJudul || currentJudul.toLowerCase().includes('unity') || currentJudul.includes('ANBK') || currentJudul.includes('Asesmen Nasional') || currentJudul.includes('Edu Zone'))
-              ? "Asesmen EduZone CBT"
-              : currentJudul.replace(/Edu\s+Zone/gi, 'EduZone');
+            const updatedJudul = (!currentJudul || currentJudul.toLowerCase().includes('unity') || currentJudul.includes('ANBK') || currentJudul.includes('Asesmen Nasional') || currentJudul.includes('Edu Zone') || currentJudul.toLowerCase().includes('candy'))
+              ? "EduZone CBT"
+              : currentJudul.replace(/Edu\s+Zone/gi, 'EduZone').replace(/Candy\s+CBT/gi, 'EduZone CBT');
 
             // Pastikan mata pelajaran Literasi (ANBK) memuat lengkap 35 butir soal resmi
             const isLiterasi = s.id === 'literasi-numerasi' || s.kode === 'ANBK' || s.nama.toLowerCase().includes('literasi');
@@ -343,7 +344,7 @@ export default function App() {
     });
   };
 
-  const handleUpdateLogoShape = (newShape: 'rounded' | 'circle' | 'square', newFit?: 'cover' | 'contain') => {
+  const handleUpdateLogoShape = (newShape: LogoShape, newFit?: LogoFit) => {
     try {
       localStorage.setItem('unity_logo_shape_v1', newShape);
       if (newFit) localStorage.setItem('unity_logo_fit_v1', newFit);
@@ -481,6 +482,8 @@ export default function App() {
   const antiCheatTimerRef = useRef<NodeJS.Timeout | null>(null);
   const activeViewRef = useRef(activeView);
   activeViewRef.current = activeView;
+  const examMountTimeRef = useRef<number>(0);
+  const blurDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Persist subjects data to localStorage safely
   useEffect(() => {
@@ -516,7 +519,7 @@ export default function App() {
     setSubjects((prev) => {
       let changed = false;
       const updated = prev.map((s) => {
-        const isUnityJudul = !s.settings?.judul || s.settings.judul.toLowerCase().includes('unity') || s.settings.judul.includes('Edu Zone');
+        const isUnityJudul = !s.settings?.judul || s.settings.judul.toLowerCase().includes('unity') || s.settings.judul.includes('Edu Zone') || s.settings.judul.toLowerCase().includes('candy');
         const isUnitySekolah = !s.settings?.sekolah || s.settings.sekolah.toLowerCase().includes('unity') || s.settings.sekolah === 'Edu Zone' || s.settings.sekolah.includes('Edu Zone');
         const isCoverFit = s.settings?.logoFit === 'cover';
         if (isUnityJudul || isUnitySekolah || isCoverFit) {
@@ -525,7 +528,7 @@ export default function App() {
             ...s,
             settings: {
               ...s.settings,
-              judul: isUnityJudul ? 'Asesmen EduZone CBT' : s.settings.judul.replace(/Edu\s+Zone/gi, 'EduZone'),
+              judul: isUnityJudul ? 'EduZone CBT' : s.settings.judul.replace(/Edu\s+Zone/gi, 'EduZone').replace(/Candy\s+CBT/gi, 'EduZone CBT'),
               sekolah: isUnitySekolah ? 'EduZone' : s.settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone'),
               logoFit: isCoverFit ? 'contain' : (s.settings.logoFit || 'contain'),
             },
@@ -604,10 +607,20 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Anti-Cheat: blur & visibility detection
+  // Anti-Cheat: blur & visibility detection with grace period and focus debounce
   useEffect(() => {
-    const handleBlur = () => {
-      if (activeViewRef.current !== 'exam') return;
+    const isExempt = () => {
+      if (activeViewRef.current !== 'exam') return true;
+      // 8-second startup grace period for camera authorization, DOM mount, fullscreen setup
+      if (Date.now() - examMountTimeRef.current < 8000) return true;
+      return false;
+    };
+
+    const triggerOverlayWarning = () => {
+      if (isExempt()) return;
+      // If strict auto-termination is enabled, ExamView handles proctoring and immediate auto-termination
+      if (settings.akhiriOtomatisJikaCurang !== false) return;
+
       setAntiCheatViolations((prev) => prev + 1);
       setShowAntiCheatOverlay(true);
       setAntiCheatCountdown(10);
@@ -618,8 +631,8 @@ export default function App() {
           if (prev <= 1) {
             if (antiCheatTimerRef.current) clearInterval(antiCheatTimerRef.current);
             setShowAntiCheatOverlay(false);
-            // Force finish exam
-            handleFinishExam({}, antiCheatViolations + 1);
+            // Force finish exam on countdown expiration
+            handleFinishExam({}, antiCheatViolations + 1, true, 'Waktu Peringatan Pelanggaran Pindah Tab Habis');
             return 0;
           }
           return prev - 1;
@@ -627,9 +640,37 @@ export default function App() {
       }, 1000);
     };
 
+    const handleBlur = () => {
+      if (isExempt()) return;
+      if (blurDebounceTimerRef.current) clearTimeout(blurDebounceTimerRef.current);
+
+      if (document.hidden) {
+        triggerOverlayWarning();
+        return;
+      }
+
+      // Debounce transient blurs (e.g. browser chrome clicks, system notifications)
+      blurDebounceTimerRef.current = setTimeout(() => {
+        if (!isExempt() && !document.hasFocus()) {
+          triggerOverlayWarning();
+        }
+      }, 2500);
+    };
+
+    const handleFocus = () => {
+      if (blurDebounceTimerRef.current) {
+        clearTimeout(blurDebounceTimerRef.current);
+        blurDebounceTimerRef.current = null;
+      }
+    };
+
     const handleVisibilityChange = () => {
-      if (document.hidden && activeViewRef.current === 'exam') {
-        handleBlur();
+      if (isExempt()) return;
+      if (document.hidden) {
+        triggerOverlayWarning();
+      } else if (!document.hidden && blurDebounceTimerRef.current) {
+        clearTimeout(blurDebounceTimerRef.current);
+        blurDebounceTimerRef.current = null;
       }
     };
 
@@ -640,16 +681,19 @@ export default function App() {
     };
 
     window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
       window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('contextmenu', handleContextMenu);
+      if (blurDebounceTimerRef.current) clearTimeout(blurDebounceTimerRef.current);
       if (antiCheatTimerRef.current) clearInterval(antiCheatTimerRef.current);
     };
-  }, [antiCheatViolations]);
+  }, [antiCheatViolations, settings.akhiriOtomatisJikaCurang]);
 
   const handleDismissAntiCheat = () => {
     if (antiCheatTimerRef.current) clearInterval(antiCheatTimerRef.current);
@@ -665,6 +709,7 @@ export default function App() {
 
   // Student Login Success
   const handleLoginSiswa = (nama: string, kelas: string) => {
+    examMountTimeRef.current = Date.now();
     setCurrentSiswa({ nama, kelas });
     setAntiCheatViolations(0);
     setActiveView('exam');
@@ -678,7 +723,10 @@ export default function App() {
   // Exam Finish Calculation
   const handleFinishExam = (
     userAnswers: Record<number, string | string[]>,
-    violations: number
+    violations: number,
+    isAutoTerminated: boolean = false,
+    autoTerminationReason: string = '',
+    proctoringPhotos: string[] = []
   ) => {
     setLastUserAnswers(userAnswers);
 
@@ -733,7 +781,12 @@ export default function App() {
       mapelId: activeSubjectId,
       mapelNama: activeSubject?.nama || settings.mapel,
       answers: userAnswers,
+      isAutoTerminated,
+      autoTerminationReason,
+      proctoringPhotos,
     };
+
+    setLastResult(newResult);
 
     // Prepend result to current active subject's results locally
     setSubjects((prev) =>
@@ -792,7 +845,9 @@ export default function App() {
           settings={settings}
           siswaNama={currentSiswa.nama}
           siswaKelas={currentSiswa.kelas}
-          onFinishExam={(answers) => handleFinishExam(answers, antiCheatViolations)}
+          onFinishExam={(answers, viols, isAutoTerm, reason, photos) =>
+            handleFinishExam(answers, viols, isAutoTerm, reason, photos)
+          }
           violations={antiCheatViolations}
         />
       )}

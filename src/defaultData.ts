@@ -2,18 +2,21 @@ import { Question, ExamSettings, SubjectPackage } from './types';
 import { ANBK_LITERASI_35_QUESTIONS } from './anbkLiterasiData';
 
 export const DEFAULT_SETTINGS: ExamSettings = {
-  judul: "Asesmen EduZone CBT",
+  judul: "EduZone CBT",
   mapel: "Literasi (ANBK) Bahasa Indonesia",
   sekolah: "EduZone",
   logoUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_Tut_Wuri_Handayani.png",
-  logoShape: "rounded",
+  logoShape: "oval",
   logoFit: "contain",
   tahunAjaran: "2025/2026",
   durasiMenit: 75,
   token: "ANBK2026",
   adminPass: "112233",
   acakSoal: false,
-  tampilkanNilai: true
+  tampilkanNilai: true,
+  akhiriOtomatisJikaCurang: true,
+  kameraPengawasAktif: true,
+  kunciLayarPenuh: true,
 };
 
 export const DEFAULT_QUESTIONS: Question[] = ANBK_LITERASI_35_QUESTIONS;

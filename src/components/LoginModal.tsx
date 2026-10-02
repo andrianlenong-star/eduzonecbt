@@ -37,6 +37,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setErrorMsg(`Token ujian tidak valid. Pastikan menggunakan token resmi: ${expectedToken}`);
       return;
     }
+    if (settings.kunciLayarPenuh !== false && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+      try {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } catch {}
+    }
     onLoginSiswa(nama.trim(), kelas.trim(), expectedToken);
   };
 
@@ -61,20 +66,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <span>Kembali ke Portal</span>
         </button>
 
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shadow-inner">
-            {role === 'siswa' ? (
-              <User className="w-8 h-8" />
+        <div className="text-center mb-6">
+          <div className="w-28 h-20 sm:w-32 sm:h-24 mx-auto mb-3 bg-slate-50 border-2 border-cyan-500 rounded-[999px] px-4 py-2 flex items-center justify-center shadow-md">
+            {settings.logoUrl ? (
+              <img
+                src={settings.logoUrl}
+                alt="Logo Sekolah"
+                className="w-full h-full object-contain rounded-[999px]"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : role === 'siswa' ? (
+              <User className="w-10 h-10 text-cyan-600" />
             ) : (
-              <Lock className="w-8 h-8" />
+              <Lock className="w-10 h-10 text-cyan-600" />
             )}
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900">
-            {role === 'siswa' ? 'Konfirmasi Peserta' : 'Verifikasi Guru'}
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-100 text-cyan-800 text-[10px] font-black uppercase tracking-widest mb-1.5 border border-cyan-200">
+            <span>EDUZONE CBT SYSTEM</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-900">
+            {role === 'siswa' ? 'Konfirmasi Peserta Tes' : 'Verifikasi Pengawas / Guru'}
           </h2>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">
             {role === 'siswa'
-              ? (settings.judul && !settings.judul.toLowerCase().includes('unity') ? settings.judul.replace(/Edu\s+Zone/gi, 'EduZone') : 'Asesmen EduZone CBT')
+              ? (settings.sekolah || 'EduZone') + ' • ' + (settings.mapel || 'Ujian Sekolah')
               : 'Otoritas Pengelolaan Ujian & Bank Soal'}
           </p>
         </div>

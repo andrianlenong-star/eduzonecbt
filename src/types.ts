@@ -16,7 +16,7 @@ export interface ExamSettings {
   mapel: string;
   sekolah: string;
   logoUrl: string;
-  logoShape?: 'rounded' | 'circle' | 'square';
+  logoShape?: 'oval' | 'rounded' | 'circle' | 'square';
   logoFit?: 'cover' | 'contain';
   tahunAjaran: string;
   durasiMenit: number;
@@ -24,6 +24,9 @@ export interface ExamSettings {
   adminPass: string;
   acakSoal: boolean;
   tampilkanNilai: boolean;
+  akhiriOtomatisJikaCurang?: boolean;
+  kameraPengawasAktif?: boolean;
+  kunciLayarPenuh?: boolean;
 }
 
 export interface ExamResult {
@@ -39,6 +42,9 @@ export interface ExamResult {
   mapelNama?: string;
   nisn?: string;
   answers?: Record<number, string | string[]>;
+  proctoringPhotos?: string[];
+  isAutoTerminated?: boolean;
+  autoTerminationReason?: string;
 }
 
 export interface SubjectPackage {

@@ -245,11 +245,11 @@ export const PortalView: React.FC<PortalViewProps> = ({
       {/* Top Navbar */}
       <header className="max-w-6xl mx-auto w-full flex flex-wrap items-center justify-between gap-4 py-4 border-b border-white/10 relative z-10">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 flex items-center justify-center shrink-0">
+          <div className="w-20 h-14 sm:w-24 sm:h-16 px-3 py-1.5 rounded-[999px] bg-white/20 backdrop-blur-md border-2 border-white/30 shadow-lg flex items-center justify-center shrink-0">
             <img
               src={settings.logoUrl || "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_Tut_Wuri_Handayani.png/480px-Logo_Tut_Wuri_Handayani.png"}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-2xl drop-shadow-md"
+              alt="Logo Sekolah"
+              className="w-full h-full object-contain rounded-full drop-shadow-md"
               referrerPolicy="no-referrer"
               crossOrigin="anonymous"
               onError={(e) => {
@@ -261,13 +261,17 @@ export const PortalView: React.FC<PortalViewProps> = ({
             />
           </div>
           <div>
-            <h2 className="text-xl font-black uppercase tracking-tight leading-tight">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-300/30 text-[10px] font-black uppercase tracking-widest mb-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse"></span>
+              <span>EDUZONE CBT</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight leading-tight text-white drop-shadow-sm">
               {settings.sekolah && !settings.sekolah.toLowerCase().includes('unity')
                 ? settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone')
                 : 'EduZone'}
             </h2>
             <p className="text-xs text-blue-200 font-semibold tracking-wider uppercase">
-              portal asesmen EduZone
+              portal asesmen eduzone cbt
             </p>
           </div>
         </div>
@@ -321,19 +325,19 @@ export const PortalView: React.FC<PortalViewProps> = ({
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto w-full my-auto py-10 relative z-10 text-center">
-        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-blue-500/30 border border-blue-400/40 text-blue-200 text-xs font-black tracking-widest uppercase mb-4 shadow-inner">
+        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-cyan-500/25 border border-cyan-400/40 text-cyan-200 text-xs font-black tracking-widest uppercase mb-4 shadow-inner">
           <CheckCircle className="w-3.5 h-3.5 text-yellow-300" />
-          <span>Sistem Ujian Berbasis Komputer & Tablet</span>
+          <span>EDUZONE CBT • Sistem Ujian Berbasis Komputer & Tablet</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight uppercase leading-none mb-6 drop-shadow-md">
-          {settings.judul && !settings.judul.toLowerCase().includes('unity')
+          {settings.judul && !settings.judul.toLowerCase().includes('unity') && !settings.judul.toLowerCase().includes('candy')
             ? settings.judul.replace(/Edu\s+Zone/gi, 'EduZone')
-            : 'Asesmen EduZone CBT'}
+            : 'EduZone CBT'}
         </h1>
 
-        {/* Bagian Logo Sekolah di Bagian Tengah Interface */}
-        <div className="max-w-md mx-auto mb-10">
+        {/* Bagian Logo Sekolah di Bagian Tengah Interface - Lebih Besar & Berbentuk Oval */}
+        <div className="max-w-lg mx-auto mb-10">
           <div
             onDragOver={!isSiswaOnly ? handleLogoDragOver : undefined}
             onDragLeave={!isSiswaOnly ? handleLogoDragLeave : undefined}
@@ -341,8 +345,8 @@ export const PortalView: React.FC<PortalViewProps> = ({
             className={`relative bg-white/10 backdrop-blur-md border-2 ${
               isDraggingLogo && !isSiswaOnly
                 ? 'border-yellow-400 bg-white/20 scale-105'
-                : 'border-white/20'
-            } rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-xl flex flex-col items-center group`}
+                : 'border-white/25'
+            } rounded-[2.5rem] p-6 sm:p-8 transition-all duration-300 shadow-2xl flex flex-col items-center group`}
           >
             {!isSiswaOnly && (
               <input
@@ -354,17 +358,17 @@ export const PortalView: React.FC<PortalViewProps> = ({
               />
             )}
 
-            {/* Logo Image Preview Container - Frameless, Sisi Melengkung, & Diperbesar */}
+            {/* Logo Image Preview Container - Lebih Besar & Berbentuk Oval Bersih */}
             <div
               onClick={!isSiswaOnly ? () => logoInputRef.current?.click() : undefined}
-              className={`relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center p-1.5 transition-all duration-300 ${
-                !isSiswaOnly ? 'cursor-pointer group hover:scale-105' : ''
+              className={`relative w-56 h-40 sm:w-64 sm:h-44 md:w-72 md:h-48 px-6 py-3 rounded-[999px] bg-white/15 backdrop-blur-xl border-4 border-white/40 shadow-2xl flex items-center justify-center transition-all duration-300 ${
+                !isSiswaOnly ? 'cursor-pointer group hover:scale-105 hover:border-yellow-300' : ''
               }`}
               title={!isSiswaOnly ? "Klik logo untuk memilih file logo baru dari komputer/HP" : undefined}
             >
               {isProcessingLogo && !isSiswaOnly ? (
-                <div className="flex flex-col items-center justify-center text-yellow-300 p-2 text-center bg-white/10 rounded-3xl backdrop-blur-sm w-full h-full border border-white/20">
-                  <Loader2 className="w-10 h-10 animate-spin mb-1 text-yellow-300" />
+                <div className="flex flex-col items-center justify-center text-yellow-300 p-2 text-center bg-white/10 rounded-[999px] backdrop-blur-sm w-full h-full border border-white/20">
+                  <Loader2 className="w-12 h-12 animate-spin mb-1 text-yellow-300" />
                   <span className="text-xs font-bold">Memproses...</span>
                 </div>
               ) : settings.logoUrl && !logoImgError ? (
@@ -372,7 +376,7 @@ export const PortalView: React.FC<PortalViewProps> = ({
                   key={settings.logoUrl}
                   src={settings.logoUrl}
                   alt="Logo Sekolah"
-                  className="w-full h-full object-contain rounded-3xl drop-shadow-[0_12px_28px_rgba(0,0,0,0.35)] transition-all duration-200"
+                  className="w-full h-full object-contain rounded-[999px] drop-shadow-[0_16px_36px_rgba(0,0,0,0.4)] transition-all duration-200"
                   referrerPolicy="no-referrer"
                   crossOrigin="anonymous"
                   onLoad={() => setLogoImgError(false)}
@@ -385,30 +389,26 @@ export const PortalView: React.FC<PortalViewProps> = ({
                 <img
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_Tut_Wuri_Handayani.png/480px-Logo_Tut_Wuri_Handayani.png"
                   alt="Logo Sekolah"
-                  className="w-full h-full object-contain rounded-3xl drop-shadow-[0_12px_28px_rgba(0,0,0,0.35)]"
+                  className="w-full h-full object-contain rounded-[999px] drop-shadow-[0_16px_36px_rgba(0,0,0,0.4)]"
                   referrerPolicy="no-referrer"
                   crossOrigin="anonymous"
                 />
               )}
-
-              {/* Discreet Camera edit badge at bottom-right corner - tidak menutupi logo */}
-              {!isSiswaOnly && !isProcessingLogo && (
-                <div
-                  className="absolute -bottom-1 -right-1 bg-yellow-400 hover:bg-yellow-300 text-slate-900 p-2 rounded-full shadow-xl border-2 border-white/90 flex items-center justify-center transition-transform group-hover:scale-110"
-                  title="Klik untuk ganti logo sekolah"
-                >
-                  <Camera className="w-4 h-4" />
-                </div>
-              )}
             </div>
 
-            {/* Status / Feedback & Actions */}
-            <div className="mt-4 flex flex-col items-center gap-1.5 w-full text-center">
-              <span className="text-xs font-black uppercase tracking-wider text-yellow-300">
-                {settings.sekolah && !settings.sekolah.toLowerCase().includes('unity')
-                  ? settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone')
-                  : 'EduZone'}
-              </span>
+            {/* Tulisan Identitas Sekolah - Di Bawah Logo, Jelas & Tidak Tertutup */}
+            <div className="mt-6 flex flex-col items-center gap-1.5 w-full text-center px-4">
+              <div className="inline-block px-5 py-1.5 rounded-full bg-slate-900/50 backdrop-blur-md border border-white/25 shadow-md">
+                <span className="text-sm sm:text-base font-black uppercase tracking-wider text-yellow-300 drop-shadow-sm">
+                  {settings.sekolah && !settings.sekolah.toLowerCase().includes('unity')
+                    ? settings.sekolah.replace(/Edu\s+Zone/gi, 'EduZone')
+                    : 'EduZone'}
+                </span>
+              </div>
+              <p className="text-xs text-blue-100 font-bold uppercase tracking-wider mt-1">
+                {settings.mapel || 'CBT Assessment System'} • T.A. {settings.tahunAjaran || '2025/2026'}
+              </p>
+            </div>
 
               {/* Tombol aksi ganti logo (Unggah Berkas, Link URL, Reset Default) HANYA untuk guru / bukan tampilan siswa */}
               {!isSiswaOnly && (
@@ -492,7 +492,6 @@ export const PortalView: React.FC<PortalViewProps> = ({
               )}
             </div>
           </div>
-        </div>
 
         {/* Portal Action Cards */}
         {isSiswaOnly ? (

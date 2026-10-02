@@ -52,6 +52,8 @@ import {
   Unlock,
   EyeOff,
   BarChart3,
+  ShieldAlert,
+  Camera,
 } from 'lucide-react';
 import { Question, QuestionType, Difficulty, ExamSettings, ExamResult, SubjectPackage } from '../types';
 import { getLogoShapeClass, getLogoFitClass } from '../utils/logoHelper';
@@ -121,6 +123,8 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
   // Results Management States
   const [showClearAllModal, setShowClearAllModal] = useState(false);
   const [resultToDelete, setResultToDelete] = useState<ExamResult | null>(null);
+  const [viewingResultDetail, setViewingResultDetail] = useState<ExamResult | null>(null);
+  const [zoomProctorPhoto, setZoomProctorPhoto] = useState<string | null>(null);
   const [selectedResultIds, setSelectedResultIds] = useState<string[]>([]);
   const [isDeletingResults, setIsDeletingResults] = useState(false);
 
@@ -222,13 +226,22 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
   const [setMapel, setSetMapel] = useState(settings.mapel);
   const [setSekolah, setSetSekolah] = useState(settings.sekolah);
   const [setLogoUrl, setSetLogoUrl] = useState(settings.logoUrl);
-  const [setLogoShape, setSetLogoShape] = useState<'rounded' | 'circle' | 'square'>(settings.logoShape || 'rounded');
+  const [setLogoShape, setSetLogoShape] = useState<'oval' | 'rounded' | 'circle' | 'square'>(settings.logoShape || 'oval');
   const [setLogoFit, setSetLogoFit] = useState<'cover' | 'contain'>(settings.logoFit || 'cover');
   const [setTahunAjaran, setSetTahunAjaran] = useState(settings.tahunAjaran || '2025/2026');
   const [setDurasi, setSetDurasi] = useState(settings.durasiMenit);
   const [setToken, setSetToken] = useState(settings.token);
   const [setAdminPass, setSetAdminPass] = useState(settings.adminPass);
   const [setTampilkanNilai, setSetTampilkanNilai] = useState(settings.tampilkanNilai);
+  const [setAkhiriOtomatisJikaCurang, setSetAkhiriOtomatisJikaCurang] = useState(
+    settings.akhiriOtomatisJikaCurang !== undefined ? settings.akhiriOtomatisJikaCurang : true
+  );
+  const [setKameraPengawasAktif, setSetKameraPengawasAktif] = useState(
+    settings.kameraPengawasAktif !== undefined ? settings.kameraPengawasAktif : true
+  );
+  const [setKunciLayarPenuh, setSetKunciLayarPenuh] = useState(
+    settings.kunciLayarPenuh !== undefined ? settings.kunciLayarPenuh : true
+  );
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
   const [logoInputTab, setLogoInputTab] = useState<'upload' | 'url'>('upload');
@@ -1032,6 +1045,9 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
       adminPass: setAdminPass.trim() || '112233',
       acakSoal: settings.acakSoal,
       tampilkanNilai: setTampilkanNilai,
+      akhiriOtomatisJikaCurang: setAkhiriOtomatisJikaCurang,
+      kameraPengawasAktif: setKameraPengawasAktif,
+      kunciLayarPenuh: setKunciLayarPenuh,
     };
     onUpdateSettings(updated);
 
@@ -1626,29 +1642,29 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
       {/* Header */}
       <header className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between shadow-lg shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 flex items-center justify-center shrink-0">
+          <div className="w-16 h-12 p-1.5 rounded-[999px] bg-white/10 border border-cyan-400/40 shadow-sm flex items-center justify-center shrink-0">
             {settings.logoUrl ? (
               <img
                 src={settings.logoUrl}
                 alt="Logo"
-                className="w-full h-full object-contain rounded-2xl drop-shadow-sm"
+                className="w-full h-full object-contain rounded-[999px] drop-shadow-sm"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
             ) : (
-              <BookOpen className="w-6 h-6 text-blue-600" />
+              <BookOpen className="w-6 h-6 text-cyan-400" />
             )}
           </div>
           <div>
             <h1 className="text-lg font-black uppercase tracking-tight text-white flex items-center gap-2">
-              <span>{settings.sekolah}</span>
-              <span className="text-xs bg-blue-500/30 text-blue-300 px-2.5 py-0.5 rounded-full font-bold uppercase">
-                Panel Proktor & Guru
+              <span>{settings.sekolah || 'EduZone'}</span>
+              <span className="text-xs bg-cyan-500/30 text-cyan-300 border border-cyan-400/30 px-2.5 py-0.5 rounded-full font-bold uppercase">
+                EDUZONE CBT PROKTOR & GURU
               </span>
             </h1>
             <p className="text-xs text-slate-400 font-semibold uppercase">
-              {settings.judul} • T.A. <span className="text-blue-300 font-bold">{settings.tahunAjaran || '2025/2026'}</span> • Token: <strong className="text-yellow-400">{settings.token}</strong>
+              {settings.judul || 'EduZone CBT'} • T.A. <span className="text-cyan-300 font-bold">{settings.tahunAjaran || '2025/2026'}</span> • Token: <strong className="text-yellow-400">{settings.token}</strong>
             </p>
           </div>
         </div>
@@ -3752,12 +3768,12 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
               </div>
 
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-                <div className="w-16 h-16 flex items-center justify-center shrink-0">
+                <div className="w-20 h-14 sm:w-24 sm:h-16 p-1.5 rounded-[999px] bg-white/20 border border-white/30 flex items-center justify-center shrink-0 shadow-sm">
                   {setLogoUrl ? (
                     <img
                       src={setLogoUrl}
                       alt="Logo Sekolah"
-                      className="w-full h-full object-contain rounded-3xl drop-shadow-md"
+                      className="w-full h-full object-contain rounded-[999px] drop-shadow-md"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = 'none';
                       }}
@@ -3891,12 +3907,12 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                   {/* Logo Preview & Quick Reset Options */}
                   <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                      <div className="w-16 h-12 p-1 rounded-[999px] bg-white border border-slate-200 flex items-center justify-center shrink-0">
                         {setLogoUrl ? (
                           <img
                             src={setLogoUrl}
                             alt="Pratinjau Logo"
-                            className="w-full h-full object-contain rounded-2xl drop-shadow-sm"
+                            className="w-full h-full object-contain rounded-[999px] drop-shadow-sm"
                           />
                         ) : (
                           <ImageIcon className="w-5 h-5 text-slate-300" />
@@ -4236,13 +4252,13 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-2 space-y-3">
                   <label className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 cursor-pointer transition">
                     <input
                       type="checkbox"
                       checked={setTampilkanNilai}
                       onChange={(e) => setSetTampilkanNilai(e.target.checked)}
-                      className="w-4 h-4 accent-blue-600 rounded cursor-pointer"
+                      className="w-4 h-4 accent-cyan-600 rounded cursor-pointer"
                     />
                     <div>
                       <span className="text-xs font-bold text-slate-800 block">
@@ -4250,6 +4266,60 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                       </span>
                       <span className="text-[11px] text-slate-400 font-medium">
                         Jika dinonaktifkan, siswa hanya akan melihat konfirmasi selesai tanpa melihat nilai akhir.
+                      </span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-red-50/70 hover:bg-red-50 border border-red-200 cursor-pointer transition">
+                    <input
+                      type="checkbox"
+                      checked={setAkhiriOtomatisJikaCurang}
+                      onChange={(e) => setSetAkhiriOtomatisJikaCurang(e.target.checked)}
+                      className="w-4 h-4 accent-red-600 rounded cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-red-900 block flex items-center gap-1.5">
+                        <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
+                        <span>Akhiri Ujian Otomatis Saat Siswa Buka Tab / Aplikasi Lain (EduZone Strict Mode)</span>
+                      </span>
+                      <span className="text-[11px] text-red-700/80 font-medium">
+                        Bila aktif, jika siswa mencoba berpindah tab, meminimalkan browser, atau membuka aplikasi lain, ujian akan langsung dihentikan dan lembar jawaban otomatis dikumpulkan.
+                      </span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-cyan-50/70 hover:bg-cyan-50 border border-cyan-200 cursor-pointer transition">
+                    <input
+                      type="checkbox"
+                      checked={setKameraPengawasAktif}
+                      onChange={(e) => setSetKameraPengawasAktif(e.target.checked)}
+                      className="w-4 h-4 accent-cyan-600 rounded cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-cyan-950 block flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-cyan-600" />
+                        <span>Rekam Otomatis dari Gadget Peserta (Kamera Pengawas Proctoring Webcam)</span>
+                      </span>
+                      <span className="text-[11px] text-cyan-800/80 font-medium">
+                        Mengaktifkan kamera depan/webcam gadget siswa untuk merekam dan mengambil foto pengawas berkala selama ujian berlangsung.
+                      </span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-50/70 hover:bg-indigo-50 border border-indigo-200 cursor-pointer transition">
+                    <input
+                      type="checkbox"
+                      checked={setKunciLayarPenuh}
+                      onChange={(e) => setSetKunciLayarPenuh(e.target.checked)}
+                      className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-indigo-950 block flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Kunci Layar Penuh & Kunci Tombol Lain (Kiosk Lockdown)</span>
+                      </span>
+                      <span className="text-[11px] text-indigo-800/80 font-medium">
+                        Mengunci tombol shortcut keyboard (F1-F12, Ctrl, Alt+Tab, Esc, klik kanan) agar hanya tampilan lembar ujian EduZone CBT yang aktif di layar siswa.
                       </span>
                     </div>
                   </label>
@@ -4684,17 +4754,42 @@ export const TeacherPanel: React.FC<TeacherPanelProps> = ({
                               >
                                 {r.pelanggaran}x
                               </span>
+                              {r.isAutoTerminated && (
+                                <div className="mt-1">
+                                  <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-rose-600 text-white tracking-wider inline-block">
+                                    Auto-Akhir
+                                  </span>
+                                </div>
+                              )}
+                              {r.proctoringPhotos && r.proctoringPhotos.length > 0 && (
+                                <div className="mt-1">
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800 border border-cyan-200 inline-flex items-center gap-1">
+                                    <Camera className="w-2.5 h-2.5 text-cyan-600" />
+                                    <span>{r.proctoringPhotos.length} Foto</span>
+                                  </span>
+                                </div>
+                              )}
                             </td>
                             <td className="p-3.5 text-center">
-                              <button
-                                type="button"
-                                onClick={() => setResultToDelete(r)}
-                                disabled={isDeletingResults}
-                                className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-100 hover:text-rose-800 border border-transparent hover:border-rose-200 transition cursor-pointer"
-                                title={`Hapus hasil ujian ${r.nama}`}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setViewingResultDetail(r)}
+                                  className="p-1.5 rounded-lg text-cyan-700 hover:bg-cyan-100 hover:text-cyan-900 border border-transparent hover:border-cyan-200 transition cursor-pointer"
+                                  title={`Lihat detail lembar jawaban & rekaman foto pengawas ${r.nama}`}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setResultToDelete(r)}
+                                  disabled={isDeletingResults}
+                                  className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-100 hover:text-rose-800 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                                  title={`Hapus hasil ujian ${r.nama}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );

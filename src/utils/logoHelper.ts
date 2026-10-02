@@ -1,13 +1,14 @@
-export type LogoShape = 'rounded' | 'circle' | 'square';
+export type LogoShape = 'oval' | 'rounded' | 'circle' | 'square';
 export type LogoFit = 'cover' | 'contain';
 
 /**
  * Returns Tailwind border-radius class matching the frame shape
+ * Default is oval / rounded-full for smooth curved oval look
  */
 export function getLogoShapeClass(shape?: string): string {
-  if (shape === 'circle') return 'rounded-full';
   if (shape === 'square') return 'rounded-2xl';
-  return 'rounded-3xl'; // default: sisi-sisi melengkung halus dan elegan
+  if (shape === 'rounded') return 'rounded-3xl';
+  return 'rounded-full'; // default: oval melengkung proporsional
 }
 
 /**
